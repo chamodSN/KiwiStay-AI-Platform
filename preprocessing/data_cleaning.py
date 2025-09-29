@@ -85,3 +85,5 @@ plt.figure(figsize=(8, 4))
 sns.histplot(df['price'], bins=50, kde=True)
 plt.title('Price Distribution After Cleaning')
 plt.show()
+
+df.to_csv(INPUT_CSV, index=False)

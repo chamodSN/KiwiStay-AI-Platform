@@ -6,11 +6,16 @@
 
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from common.config import INPUT_CSV
+
+df = pd.read_csv(INPUT_CSV)
 
 # Drop irrelevant columns for prediction (name, host_name, last_review, license if still there)
 drop_cols = ['name', 'host_name', 'last_review']  # Assuming not useful for price prediction
-if 'license' in df.columns:
-    drop_cols.append('license')
+
 df_reduced = df.drop(drop_cols, axis=1)
 
 # Numerical features for PCA
@@ -35,3 +40,5 @@ plt.figure(figsize=(6, 4))
 plt.bar(range(1, 4), pca.explained_variance_ratio_)
 plt.title('PCA Variance Explained')
 plt.show()
+
+df.to_csv(INPUT_CSV, index=False)
