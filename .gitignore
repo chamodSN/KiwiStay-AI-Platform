@@ -1,0 +1,38 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.so
+
+# Virtual environments
+venv/
+env/
+.fdm/
+fdm/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VSCode settings
+.vscode/
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Data files
+data/listings.csv
+
+# Environment/config files
+*.env
+*.cfg
+
+# Build / distribution
+build/
+dist/
+*.egg-info/
