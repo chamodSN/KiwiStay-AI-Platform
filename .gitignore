@@ -27,6 +27,7 @@ Thumbs.db
 
 # Data files
 data/listings.csv
+data/
 
 # Environment/config files
 *.env

@@ -2,7 +2,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from common.config import INPUT_CSV
+from common.config import INPUT_CSV, CLEANING_OUTPUT_CSV
 
 df = pd.read_csv(INPUT_CSV)
 
@@ -20,7 +20,7 @@ df = pd.read_csv(INPUT_CSV)
 df = df.drop_duplicates(subset=['id'])
 print("Shape after removing duplicates:", df.shape)
 
-# Handle missing reviews_per_month: Set to 0 where number_of_reviews == 0
+# Handle missing reviews_per_month: Set to 0 where number_of_reviews == 0(otherwise NaN)
 df.loc[df['number_of_reviews'] == 0, 'reviews_per_month'] = 0
 
 # Handle other missing: Drop rows with missing price (target)
@@ -43,12 +43,19 @@ max_days = df['days_since_last_review'].max() + 1  # For no reviews
 df['days_since_last_review'].fillna(max_days, inplace=True)
 print("Days since last review stats:", df['days_since_last_review'].describe())
 
+# Cap days_since_last_review at 95th percentile to remove extreme outliers
+days_95 = df['days_since_last_review'].quantile(0.95)
+df['days_since_last_review'] = df['days_since_last_review'].clip(upper=days_95)
+print("Days since last review stats after capping:",
+      df['days_since_last_review'].describe())
+
 # Create is_inactive flag instead of dropping 0 availability
 df['is_inactive'] = (df['availability_365'] == 0).astype(int)
 
-# Outlier handling: Cap price at 99th percentile
-price_99 = df['price'].quantile(0.99)
-df['price'] = df['price'].clip(upper=price_99)
+# Outlier handling: Cap price at 95th percentile (tighter for flat tail after 1000)
+price_95 = df['price'].quantile(0.95)
+df['price'] = df['price'].clip(upper=price_95)
+print("Price stats after capping:", df['price'].describe())
 
 # Outlier handling: Cap minimum_nights at 95th percentile (data-driven)
 min_nights_95 = df['minimum_nights'].quantile(0.95)
@@ -63,7 +70,8 @@ for col in numerical_cols:
 threshold = 100
 value_counts = df['neighbourhood_group'].value_counts()
 rare_neigh = value_counts[value_counts < threshold].index
-df['neighbourhood_group_cleaned'] = df['neighbourhood_group'].replace(rare_neigh, 'Other')
+df['neighbourhood_group_cleaned'] = df['neighbourhood_group'].replace(
+    rare_neigh, 'Other')
 
 # Merge rare room types for linear regression
 df['room_type_cleaned'] = df['room_type'].replace({
@@ -86,4 +94,5 @@ sns.histplot(df['price'], bins=50, kde=True)
 plt.title('Price Distribution After Cleaning')
 plt.show()
 
-df.to_csv(INPUT_CSV, index=False)
+df.to_csv(CLEANING_OUTPUT_CSV, index=False)
+

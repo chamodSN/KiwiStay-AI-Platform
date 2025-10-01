@@ -29,8 +29,6 @@ print("\nNumerical stats:\n", df.describe())
 # Special check for reviews: Rows with number_of_reviews == 0 should have NaN in last_review and reviews_per_month
 zero_reviews = df[df['number_of_reviews'] == 0]
 print("\nRows with 0 reviews:", zero_reviews.shape[0])
-print("Missing last_review in 0 reviews rows:", zero_reviews['last_review'].isnull().sum())
-print("Missing reviews_per_month in 0 reviews rows:", zero_reviews['reviews_per_month'].isnull().sum())
 
 # Plot missing values heatmap
 plt.figure(figsize=(12, 6))
@@ -46,4 +44,3 @@ plt.show()
 
 # Seed for reproducibility
 np.random.seed(42)
-
