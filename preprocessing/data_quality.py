@@ -1,10 +1,11 @@
-# Code for Data Quality Check
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
 from common.config import INPUT_CSV
+
+np.random.seed(42)  # Seed for reproducibility
 
 df = pd.read_csv(INPUT_CSV)
 
@@ -42,5 +43,14 @@ sns.histplot(df['price'], bins=50, kde=True)
 plt.title('Price Distribution')
 plt.show()
 
-# Seed for reproducibility
-np.random.seed(42)
+# Additional plot for availability (for forecasting task)
+plt.figure(figsize=(8, 4))
+sns.histplot(df['availability_365'], bins=50, kde=True)
+plt.title('Availability Distribution')
+plt.show()
+
+# Additional plot for reviews_per_month (for demand prediction)
+plt.figure(figsize=(8, 4))
+sns.histplot(df['reviews_per_month'].dropna(), bins=50, kde=True)
+plt.title('Reviews Per Month Distribution')
+plt.show()
