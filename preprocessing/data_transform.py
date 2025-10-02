@@ -48,9 +48,7 @@ poly_df = pd.DataFrame(
     poly_features, columns=poly.get_feature_names_out(inter_cols), index=df.index)
 
 # Combine all features: drop original categoricals, keep numerical, add encoded and interaction features
-df_transformed = pd.concat(
-    [df.drop(cat_cols + ['neighbourhood'], axis=1), encoded_df, poly_df], axis=1)
-
+df_transformed = pd.concat([df.drop(['neighbourhood_group_cleaned', 'neighbourhood'], axis=1), encoded_df, poly_df], axis=1)  # Keep 'room_type_cleaned'
 # Scale numerical columns (including new features) after engineering
 scaler = MinMaxScaler()
 numerical_cols_extended = numerical_cols + \
