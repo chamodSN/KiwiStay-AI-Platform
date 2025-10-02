@@ -7,7 +7,7 @@ from sklearn.feature_selection import mutual_info_regression
 from sklearn.model_selection import train_test_split
 import joblib
 import os
-from common.config import INPUT_CSV
+from common.config import DISCRETIZATION_OUTPUT_CSV
 
 # Explanation: Use correlation, mutual info, and RF feature importance to check relation to price.
 # Create and save X_train, y_train for other models to access.
@@ -15,17 +15,22 @@ from common.config import INPUT_CSV
 # Fix ValueError by ensuring df_ml has 1D columns, checking for duplicates, and aligning indices.
 
 # Load transformed data
-df_transformed = pd.read_csv(INPUT_CSV)
+df_transformed = pd.read_csv(DISCRETIZATION_OUTPUT_CSV)
 
 # Prepare data (use transformed df, drop non-numeric)
 # Ensure indices are aligned and duplicates are removed
-df_ml = df_transformed.select_dtypes(include=['float64', 'int64', 'uint8']).dropna().reset_index(drop=True)
+df_ml = df_transformed.select_dtypes(
+    include=['float64', 'int64', 'uint8']).dropna().reset_index(drop=True)
 
 # Check for duplicate columns
 duplicate_cols = df_ml.columns[df_ml.columns.duplicated()]
 if len(duplicate_cols) > 0:
     print("Duplicate columns found:", duplicate_cols)
     df_ml = df_ml.loc[:, ~df_ml.columns.duplicated()]  # Keep first occurrence
+
+# Explicitly drop id and host_id if present
+df_ml = df_ml.drop(
+    ['id', 'host_id', 'days_since_last_review'], axis=1, errors='ignore')
 
 # Verify column shapes for plotting
 print("df_ml shape:", df_ml.shape)
@@ -39,7 +44,8 @@ X = df_ml.drop(['price', 'log_price'], axis=1, errors='ignore')  # Features
 y = df_ml['log_price'] if 'log_price' in df_ml else df_ml['price']
 
 # Split into train/test (80/20 split)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42)
 print("X_train shape:", X_train.shape)
 print("y_train shape:", y_train.shape)
 print("X_test shape:", X_test.shape)
@@ -65,7 +71,8 @@ print("\nMutual Info:\n", mi_df)
 # RF importance
 rf = RandomForestRegressor(random_state=42)
 rf.fit(X, y)
-imp = pd.Series(rf.feature_importances_, index=X.columns).sort_values(ascending=False)
+imp = pd.Series(rf.feature_importances_,
+                index=X.columns).sort_values(ascending=False)
 print("\nRF Importance:\n", imp)
 
 # Plot correlation heatmap
