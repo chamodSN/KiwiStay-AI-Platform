@@ -44,7 +44,7 @@ poly_df = pd.DataFrame(poly_features, columns=poly.get_feature_names_out(inter_c
 # WHY: New interaction (e.g., availability * recent_reviews_ratio) captures demand patterns for classification/forecasting.
 
 # Combine all
-df_transformed = pd.concat([df.drop(cat_cols + ['neighbourhood'], axis=1), encoded_df, poly_df], axis=1)
+df_transformed = pd.concat([df.drop(['neighbourhood_group_cleaned', 'neighbourhood'], axis=1), encoded_df, poly_df], axis=1)  # Keep 'room_type_cleaned'
 
 # Scale numerical (extended)
 scaler = MinMaxScaler()

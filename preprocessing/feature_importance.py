@@ -33,6 +33,8 @@ median_avail = df_transformed['availability_365'].median()
 df_transformed['availability_bin_high_low'] = np.where(
     df_transformed['availability_365'] > median_avail, 1, 0)
 
+df_transformed.to_csv('data/listings_discretized_enhanced.csv', index=False)
+
 # Prepare data
 df_ml = df_transformed.select_dtypes(
     include=['float64', 'int64', 'uint8']).dropna().reset_index(drop=True)
