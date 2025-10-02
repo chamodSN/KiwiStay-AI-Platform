@@ -10,7 +10,7 @@ import numpy as np
 np.random.seed(42)
 
 # Load data
-df = pd.read_csv('data/listings_discretized.csv')
+df = pd.read_csv('data/listings_discretized_enhanced.csv')
 X_cluster = df[['log_price', 'loc_pca1', 'loc_pca2', 'availability_365', 'recent_reviews_ratio', 'minimum_nights_cleaned']]
 
 # Custom scorer
