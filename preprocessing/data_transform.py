@@ -43,9 +43,10 @@ poly_features = poly.fit_transform(df[inter_cols])
 poly_df = pd.DataFrame(poly_features, columns=poly.get_feature_names_out(inter_cols), index=df.index)
 # WHY: New interaction (e.g., availability * recent_reviews_ratio) captures demand patterns for classification/forecasting.
 
-# Combine all features: drop original categoricals, keep numerical, add encoded and interaction features
+# Combine all
 df_transformed = pd.concat([df.drop(['neighbourhood_group_cleaned', 'neighbourhood'], axis=1), encoded_df, poly_df], axis=1)  # Keep 'room_type_cleaned'
-# Scale numerical columns (including new features) after engineering
+
+# Scale numerical (extended)
 scaler = MinMaxScaler()
 numerical_cols_extended = numerical_cols + poly.get_feature_names_out(inter_cols).tolist() + ['neighbourhood_encoded']
 df_transformed[numerical_cols_extended] = scaler.fit_transform(df_transformed[numerical_cols_extended])
