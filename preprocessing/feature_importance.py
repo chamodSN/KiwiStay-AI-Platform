@@ -20,6 +20,8 @@ np.random.seed(42)  # Seed for reproducibility
 # UPDATE: Added 'availability_bin_high_low' (high if availability_365 > median).
 # UPDATE: Compute importance for multiple targets (log_price, popularity_bin, availability_bin_high_low).
 # WHY: Supports demand prediction (classification) and availability forecasting; RFClassifier for binary targets.
+# UPDATE: To take only necessary features per task, drop high-cardinality neighbourhood_group one-hot columns (use loc_pca and neighbourhood_encoded for location instead).
+# This aligns with preprocessing: PCA for location reduction, target encoding for neighbourhood, interactions for key numericals.
 
 df_transformed = pd.read_csv(DISCRETIZATION_OUTPUT_CSV)
 
@@ -41,40 +43,60 @@ df_ml = df_transformed.select_dtypes(
 df_ml = df_ml.drop(['id', 'host_id', 'days_since_last_review'],
                    axis=1, errors='ignore')  # Explicit drop
 
-# For regression (log_price)
+# Drop high-cardinality neighbourhood_group one-hot (not necessary; use reduced location features)
+neigh_group_cols = [col for col in df_ml.columns if col.startswith(
+    'neighbourhood_group_cleaned_')]
+df_ml = df_ml.drop(neigh_group_cols, axis=1)
+
+# For regression (log_price) - necessary: location (pca/encoded), room_type ohe, reviews/availability numericals, interactions
 X_reg = df_ml.drop(['price', 'log_price', 'popularity_bin',
                    'availability_bin_high_low'], axis=1, errors='ignore')
 y_reg = df_ml['log_price']
 
-# For classification (popularity_bin)
-X_clf = X_reg.copy()  # Same features
+# For classification (popularity_bin) - necessary: focus on review-related + room_type + location pca + relevant interactions
+clf_features = ['number_of_reviews', 'reviews_per_month', 'number_of_reviews_ltm_cleaned', 'recent_reviews_ratio',
+                'neighbourhood_encoded', 'loc_pca1', 'loc_pca2'] + \
+    [col for col in df_ml.columns if col.startswith('room_type_cleaned_')] + \
+    [col for col in df_ml.columns if 'recent_reviews_ratio' in col or 'calculated_host_listings_count' in col]
+X_clf = df_ml[[col for col in clf_features if col in df_ml.columns]].dropna(
+    axis=1)
 y_clf = df_ml['popularity_bin']
 
-# For availability forecasting (availability_bin_high_low)
+# For availability forecasting (availability_bin_high_low) - necessary: availability/host numericals + location + interactions
+avail_features = ['availability_365', 'minimum_nights_cleaned', 'calculated_host_listings_count', 'is_inactive',
+                  'loc_pca1', 'loc_pca2', 'neighbourhood_encoded'] + \
+    [col for col in df_ml.columns if 'availability_365' in col or 'minimum_nights_cleaned' in col or 'calculated_host_listings_count' in col]
+X_avail = df_ml[[col for col in avail_features if col in df_ml.columns]].dropna(
+    axis=1)
 y_avail = df_ml['availability_bin_high_low']
 
-# Split (shared X for all)
-X_train, X_test, y_reg_train, y_reg_test = train_test_split(
+# Split (task-specific X)
+X_reg_train, X_reg_test, y_reg_train, y_reg_test = train_test_split(
     X_reg, y_reg, test_size=0.2, random_state=42)
-_, _, y_clf_train, y_clf_test = train_test_split(
+X_clf_train, X_clf_test, y_clf_train, y_clf_test = train_test_split(
     X_clf, y_clf, test_size=0.2, random_state=42)
-_, _, y_avail_train, y_avail_test = train_test_split(
-    X_clf, y_avail, test_size=0.2, random_state=42)
+X_avail_train, X_avail_test, y_avail_train, y_avail_test = train_test_split(
+    X_avail, y_avail, test_size=0.2, random_state=42)
 
-# Save
+# Save (task-specific)
 os.makedirs('data/processed', exist_ok=True)
-joblib.dump(X_train, 'data/processed/X_train.pkl')
+joblib.dump(X_reg_train, 'data/processed/X_reg_train.pkl')
 joblib.dump(y_reg_train, 'data/processed/y_reg_train.pkl')  # Regression
+joblib.dump(X_clf_train, 'data/processed/X_clf_train.pkl')
 joblib.dump(y_clf_train, 'data/processed/y_clf_train.pkl')  # Classification
+joblib.dump(X_avail_train, 'data/processed/X_avail_train.pkl')
 joblib.dump(y_avail_train, 'data/processed/y_avail_train.pkl')  # Availability
-joblib.dump(X_test, 'data/processed/X_test.pkl')
+joblib.dump(X_reg_test, 'data/processed/X_reg_test.pkl')
 joblib.dump(y_reg_test, 'data/processed/y_reg_test.pkl')
+joblib.dump(X_clf_test, 'data/processed/X_clf_test.pkl')
 joblib.dump(y_clf_test, 'data/processed/y_clf_test.pkl')
+joblib.dump(X_avail_test, 'data/processed/X_avail_test.pkl')
 joblib.dump(y_avail_test, 'data/processed/y_avail_test.pkl')
-print("Saved train/test sets for regression, classification, and availability to data/processed/")
+print("Saved task-specific train/test sets to data/processed/")
 
-# Correlation for regression
-corr = df_ml.corr()['log_price'].sort_values(ascending=False)
+# Correlation for regression (using X_reg)
+corr = df_ml[X_reg.columns.tolist() + ['log_price']
+             ].corr()['log_price'].sort_values(ascending=False)
 print("Correlations with log_price:\n", corr)
 
 # Mutual info for regression
@@ -102,22 +124,26 @@ imp_clf = pd.Series(rf_clf.feature_importances_,
 print("\nRF Importance (Classification - Popularity):\n", imp_clf)
 
 # Mutual info for availability
-mi_avail = mutual_info_classif(X_clf, y_avail, random_state=42)
+mi_avail = mutual_info_classif(X_avail, y_avail, random_state=42)
 mi_df_avail = pd.Series(
-    mi_avail, index=X_clf.columns).sort_values(ascending=False)
+    mi_avail, index=X_avail.columns).sort_values(ascending=False)
 print("\nMutual Info (Availability Forecasting):\n", mi_df_avail)
 
 # RF importance for availability
 rf_avail = RandomForestClassifier(random_state=42)
-rf_avail.fit(X_clf, y_avail)
+rf_avail.fit(X_avail, y_avail)
 imp_avail = pd.Series(rf_avail.feature_importances_,
-                      index=X_clf.columns).sort_values(ascending=False)
+                      index=X_avail.columns).sort_values(ascending=False)
 print("\nRF Importance (Availability Forecasting):\n", imp_avail)
 
-# Plot correlation heatmap
+# Plot correlation heatmap (using combined necessary features for viz)
+combined_cols = list(set(X_reg.columns) | set(
+    X_clf.columns) | set(X_avail.columns))
+sns_heatmap_df = df_ml[combined_cols + ['log_price',
+                                        'popularity_bin', 'availability_bin_high_low']].corr()
 plt.figure(figsize=(10, 8))
-sns.heatmap(df_ml.corr(), cmap='coolwarm')
-plt.title('Correlation Heatmap')
+sns.heatmap(sns_heatmap_df, cmap='coolwarm')
+plt.title('Correlation Heatmap (Necessary Features)')
 plt.show()
 
 # Scatter example: log_price vs availability

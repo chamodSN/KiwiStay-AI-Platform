@@ -10,10 +10,10 @@ import os
 # Evaluate and compare with default.
 
 # Load data
-X_train = joblib.load('data/processed/X_train.pkl')
-y_train = joblib.load('data/processed/y_train.pkl')
-X_test = joblib.load('data/processed/X_test.pkl')
-y_test = joblib.load('data/processed/y_test.pkl')
+X_train = joblib.load('data/processed/X_reg_train.pkl')
+y_train = joblib.load('data/processed/y_reg_train.pkl')
+X_test = joblib.load('data/processed/X_reg_test.pkl')
+y_test = joblib.load('data/processed/y_reg_test.pkl')
 
 # Define parameter grid
 param_grid = {

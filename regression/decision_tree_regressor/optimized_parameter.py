@@ -6,10 +6,10 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # Load data
-X_train = joblib.load('data/processed/X_train.pkl')
-y_train = joblib.load('data/processed/y_train.pkl')
-X_test = joblib.load('data/processed/X_test.pkl')
-y_test = joblib.load('data/processed/y_test.pkl')
+X_train = joblib.load('data/processed/X_reg_train.pkl')
+y_train = joblib.load('data/processed/y_reg_train.pkl')
+X_test = joblib.load('data/processed/X_reg_test.pkl')
+y_test = joblib.load('data/processed/y_reg_test.pkl')
 
 # Define parameter grid
 param_grid = {
@@ -18,7 +18,8 @@ param_grid = {
 }
 
 # Train with GridSearchCV
-grid = GridSearchCV(DecisionTreeRegressor(random_state=42), param_grid, cv=5, scoring='r2')
+grid = GridSearchCV(DecisionTreeRegressor(random_state=42),
+                    param_grid, cv=5, scoring='r2')
 grid.fit(X_train, y_train)
 best_dt = grid.best_estimator_
 y_pred_opt = best_dt.predict(X_test)
@@ -27,12 +28,14 @@ y_pred_opt = best_dt.predict(X_test)
 mae_opt = mean_absolute_error(y_test, y_pred_opt)
 mse_opt = mean_squared_error(y_test, y_pred_opt)
 r2_opt = r2_score(y_test, y_pred_opt)
-print(f"Decision Tree (Optimized): Params={grid.best_params_}, MAE={mae_opt:.2f}, MSE={mse_opt:.2f}, R2={r2_opt:.2f}")
+print(
+    f"Decision Tree (Optimized): Params={grid.best_params_}, MAE={mae_opt:.2f}, MSE={mse_opt:.2f}, R2={r2_opt:.2f}")
 
 # Save model and parameters
 os.makedirs('data/models', exist_ok=True)
 joblib.dump(best_dt, 'data/models/decision_tree_optimized.pkl')
-joblib.dump(grid.best_params_, 'data/models/decision_tree_optimized_params.pkl')
+joblib.dump(grid.best_params_,
+            'data/models/decision_tree_optimized_params.pkl')
 print("Saved Decision Tree optimized model and parameters to data/models/")
 
 # Plot actual vs predicted (default vs optimized)
