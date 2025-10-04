@@ -10,7 +10,7 @@ import os
 np.random.seed(42)
 
 # Load data
-df = pd.read_csv('data/discretization_output.csv')
+df = pd.read_csv('data/listings_discretized_enhanced.csv')
 X = df.select_dtypes(include=['float64', 'int64', 'uint8']).drop(['price', 'log_price', 'popularity_bin', 'availability_bin_high_low'], axis=1, errors='ignore')
 y = df['popularity_bin']
 

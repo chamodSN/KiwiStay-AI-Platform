@@ -10,10 +10,10 @@ import os
 # Load data from data/processed/ and save model for reuse.
 
 # Load data
-X_train = joblib.load('data/processed/X_train.pkl')
-y_train = joblib.load('data/processed/y_train.pkl')
-X_test = joblib.load('data/processed/X_test.pkl')
-y_test = joblib.load('data/processed/y_test.pkl')
+X_train = joblib.load('data/processed/X_reg_train.pkl')
+y_train = joblib.load('data/processed/y_reg_train.pkl')
+X_test = joblib.load('data/processed/X_reg_test.pkl')
+y_test = joblib.load('data/processed/y_reg_test.pkl')
 
 # Train Bagging with DecisionTree
 bag = BaggingRegressor(estimator=DecisionTreeRegressor(random_state=42), n_estimators=100, random_state=42)
