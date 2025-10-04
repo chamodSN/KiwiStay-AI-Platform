@@ -37,3 +37,8 @@ data/
 build/
 dist/
 *.egg-info/
+data/listings_reduced.csv
+data/listings_transformed.csv
+data/listings_discretized_enhanced.csv
+data/listings_discretized.csv
+data/listings_cleaned.csv
