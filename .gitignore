@@ -43,3 +43,9 @@ data/listings_discretized_enhanced.csv
 data/listings_reduced.csv
 data/listings_transformed.csv
 data/processed/association_rules.csv
+
+__pycache__/
+*.pyc
+
+data/*.csv
+data/processed/*.csv
