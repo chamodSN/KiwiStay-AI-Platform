@@ -3,7 +3,6 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-*.pkl
 *.so
 
 # Virtual environments
@@ -25,9 +24,6 @@ fdm/
 .DS_Store
 Thumbs.db
 
-# Data files
-
-
 # Environment/config files
 *.env
 *.cfg
@@ -37,15 +33,33 @@ build/
 dist/
 *.egg-info/
 
-data/listings.csv
-data/listings_discretized.csv
-data/listings_discretized_enhanced.csv
-data/listings_reduced.csv
-data/listings_transformed.csv
-data/processed/association_rules.csv
+# Temporary files
+*.tmp
+*.bak
 
-__pycache__/
-*.pyc
+# Exclude specific unneeded files (adjust as necessary)
+*.ipynb
+*.csv.bak
+*.pkl.bak
 
-data/*.csv
-data/processed/*.csv
+# Include required data and model files explicitly
+!data/
+!data/listings_discretized_enhanced.csv
+!data/processed/
+!data/processed/X_reg_train.pkl
+!data/processed/X_clf_train.pkl
+!data/processed/X_avail_train.pkl
+!data/processed/association_rules.csv
+!data/models/
+!data/models/xgboost_optimized.pkl
+!data/models/classification/
+!data/models/classification/xgb_optimized.pkl
+!data/models/classification/xgb_availability.pkl
+!data/processed/scaler.pkl
+
+# Include frontend script
+!frontend/
+!frontend/streamlit_app_frontend.py
+
+# Include requirements file
+!requirements.txt
