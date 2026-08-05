@@ -74,3 +74,4 @@ Thumbs.db
 
 # UV Package Manager
 .uv/
+/notebooks/data
