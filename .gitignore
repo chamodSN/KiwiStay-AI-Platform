@@ -18,18 +18,16 @@ ENV/
 .env.*
 !.env.example
 
-# Data Files
+# Data Files - raw and processed CSVs stay local only
 data/raw/
+data/processed/
 data/interim/
 data/external/
 
 # Keep folder structure
 !data/.gitkeep
 
-# Models
-models/
-*.pkl
-*.joblib
+# Large model formats
 *.h5
 *.hdf5
 *.onnx
