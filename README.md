@@ -177,7 +177,7 @@ streamlit run frontend/streamlit_app_frontend.py
 
 ### Contributors
 - **Chamod**: Data Preprocessing
-- **Sandun**: 
+- **Sandun**: Feature Engineering
 - **Monali**: Data Preprocessing
 - **Lihini**: Streamlit Frontend
 
