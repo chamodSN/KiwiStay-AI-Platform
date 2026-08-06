@@ -17,8 +17,8 @@ The strongest evaluated model was XGBoost.
 
 | Model | RMSE (NZD) | MAE (NZD) | R² |
 | --- | ---: | ---: | ---: |
-| Ridge baseline | 171960.583 | - | - |
-| LightGBM | 134710.766 | - | - |
+| Ridge baseline | 171 | 96 | 0.583 |
+| LightGBM | 134 | 71 | 0.766 |
 | XGBoost | 132 | 70 | 0.773 |
 
 XGBoost gave the best balance of error reduction and explained variance, so it is the recommended model for the deployed app.
