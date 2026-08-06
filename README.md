@@ -78,16 +78,32 @@ reports/figures/
 
 ## Getting Started
 
-### Install Dependencies
+## Install Dependencies
+
+Install the required packages using either **pip** or **uv**:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Run the App
+**Or, if you're using uv:**
+
+```bash
+uv sync
+```
+
+## Run the Application
+
+Start the Streamlit application using either **streamlit** or **uv**:
 
 ```bash
 streamlit run app/app.py
+```
+
+**Or, if you're using uv:**
+
+```bash
+uv run streamlit run app/app.py
 ```
 
 If your Streamlit entry point is different in your environment, use the script that builds the deployed demo.
