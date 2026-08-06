@@ -32,14 +32,6 @@ data/external/
 *.hdf5
 *.onnx
 
-# Reports & Figures
-reports/figures/
-*.png
-*.jpg
-*.jpeg
-*.svg
-*.pdf
-
 # Logs
 logs/
 *.log

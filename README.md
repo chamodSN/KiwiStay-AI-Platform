@@ -1,184 +1,99 @@
-# Airbnb Price Predictor NZ
+# KiwiStay Airbnb Price Predictor
 
-## Overview
-This project builds a machine learning pipeline to predict Airbnb listing prices in New Zealand (NZ) using regression models. The dataset (`data/listings.csv`) contains features like location (latitude, longitude), room type, availability, and minimum nights. The pipeline includes data preprocessing, feature engineering, regression modeling (including Decision Tree, Random Forest, etc.), ensemble methods, and a Streamlit web app for interactive predictions. 
+KiwiStay predicts Airbnb nightly prices in New Zealand from listing attributes, location signals, and engineered review and availability features. The project includes notebook-based data quality checks, feature engineering, model training, and a deployed Streamlit demo.
 
-The target variable is `log_price` (log-transformed price) to handle skewness, with predictions converted back to NZD.
+**Live app:** [https://kiwistaypricepredict.streamlit.app/#kiwi-stay-airbnb-price-predictor](https://kiwistaypricepredict.streamlit.app/#kiwi-stay-airbnb-price-predictor)
 
-**Key goals:**
-- Clean and transform raw data for modeling.
-- Train and optimize multiple regression models.
-- Combine models in ensembles for better accuracy.
-- Deploy predictions via a user-friendly Streamlit app.
+## Highlights
 
----
+- Trains and compares several regression models for NZD price prediction.
+- Uses log-price modeling to reduce skew during training.
+- Exports model diagnostics and notebook figures into `reports/figures/`.
+- Deploys an interactive Streamlit app for end-to-end price prediction.
 
-## Project Structure
-├── **common/**  
-│   └── `config.py` # Constants: RANDOM_SEED, INPUT_CSV  
-├── **data/**  
-│   ├── `listings.csv` # Raw and processed Airbnb dataset  
-│   ├── **models/** # Saved models and parameters  
-│   │   ├── `decision_tree_basic.pkl`  
-│   │   ├── `decision_tree_basic_params.pkl`  
-│   │   ├── `decision_tree_optimized.pkl`  
-│   │   ├── `decision_tree_optimized_params.pkl`  
-│   │   ├── `gradient_boosting_basic.pkl`  
-│   │   ├── `gradient_boosting_basic_params.pkl`  
-│   │   ├── `gradient_boosting_optimized.pkl`  
-│   │   ├── `gradient_boosting_optimized_params.pkl`  
-│   │   ├── `linear_regression_basic.pkl`  
-│   │   ├── `linear_regression_basic_params.pkl`  
-│   │   ├── `linear_regression_optimized.pkl`  
-│   │   ├── `linear_regression_optimized_params.pkl`  
-│   │   ├── `random_forest_basic.pkl`  
-│   │   ├── `random_forest_basic_params.pkl`  
-│   │   ├── `random_forest_optimized.pkl`  
-│   │   ├── `random_forest_optimized_params.pkl`  
-│   │   ├── `xgboost_basic.pkl`  
-│   │   ├── `xgboost_basic_params.pkl`  
-│   │   ├── `xgboost_optimized.pkl`  
-│   │   ├── `xgboost_optimized_params.pkl`  
-│   │   ├── `adaboost_ensemble.pkl`  
-│   │   ├── `adaboost_ensemble_params.pkl`  
-│   │   ├── `stacking_ensemble.pkl`  
-│   │   └── `bagging_ensemble.pkl`  
-│   └── **processed/** # Train/test splits  
-│       ├── `X_train.pkl`  
-│       ├── `X_test.pkl`  
-│       ├── `y_train.pkl`  
-│       └── `y_test.pkl`  
-├── **preprocessing/**  
-│   ├── `data_cleaning.py`  
-│   ├── `data_discritization.py`  
-│   ├── `data_quality.py`  
-│   ├── `data_reduction.py`  
-│   ├── `data_transform.py`  
-│   └── `feature_importance.py`  
-├── **regression/**  
-│   ├── **decision_tree_regressor/**  
-│   │   ├── `basic_parameter.py`  
-│   │   └── `optimized_parameter.py`  
-│   ├── **gradient_boosting_regressor/**  
-│   │   ├── `basic_parameter.py`  
-│   │   └── `optimized_parameter.py`  
-│   ├── **linear_regression/**  
-│   │   ├── `basic_parameter.py`  
-│   │   └── `optimized_parameter.py`  
-│   ├── **random_forest_regressor/**  
-│   │   ├── `basic_parameters.py`  
-│   │   └── `optimized_parameter.py`  
-│   ├── **xgboost_regressor/**  
-│   │   ├── `basic_parameter.py`  
-│   │   └── `optimized_parameter.py`  
-│   ├── **ensemble/**  
-│   │   ├── `adaboost_ensemble.py`  
-│   │   ├── `bagging_ensemble.py`  
-│   │   └── `stacking_ensemble.py`  
-│   └── `report_generator.py`  
-├── **frontend/**  
-│   └── `streamlit_app_frontend.py`  
-└── `README.md`
+## Results
 
+The strongest evaluated model was XGBoost.
 
----
+| Model | RMSE (NZD) | MAE (NZD) | R² |
+| --- | ---: | ---: | ---: |
+| Ridge baseline | 171960.583 | - | - |
+| LightGBM | 134710.766 | - | - |
+| XGBoost | 132 | 70 | 0.773 |
 
-## Setup Instructions
+XGBoost gave the best balance of error reduction and explained variance, so it is the recommended model for the deployed app.
 
-### Clone Repository
-```bash
-git clone <repository_url>
-cd airbnb-price-predictor-nz
+## Notebook Outputs
+
+### Data Quality
+
+The data quality notebook shows how outlier removal changed the price distribution from extremely skewed to more usable for modeling.
+
+| Before outlier removal | After outlier removal |
+| --- | --- |
+| ![Price distribution before outliers](reports/figures/fig_01_price_before_outliers.png) | ![Price distribution after outliers](reports/figures/fig_03_price_after_outliers.png) |
+| ![Boxplot before outliers](reports/figures/fig_02_boxplot_before_outliers.png) | ![Boxplot after outliers](reports/figures/fig_04_boxplot_after_outliers.png) |
+
+### Feature Engineering
+
+`feature_engineering.ipynb` surfaced the most important linear relationships with price.
+
+![Feature correlations with price](reports/figures/fig_05_feature_correlations.png)
+
+### Model Training
+
+The model training notebook confirms why log-transforming price helps and shows which features drive the final XGBoost model.
+
+| Price before transform | Log(price + 1) |
+| --- | --- |
+| ![Skewed price distribution](reports/figures/fig_06_price_skewed.png) | ![Log-transformed price distribution](reports/figures/fig_07_log_price_normal.png) |
+
+![Top feature importances from XGBoost](reports/figures/fig_08_xgboost_feature_importance.png)
+
+![Residual plot for XGBoost](reports/figures/fig_09_xgboost_residuals.png)
+
+### App Preview
+
+![Streamlit app preview](reports/figures/UI.png)
+
+## Repository Layout
+
+```text
+main.py
+app/
+data/
+	raw/
+	processed/
+models/
+notebooks/
+reports/figures/
 ```
+
+## Key Workflow
+
+1. Run the data quality notebook to inspect nulls, distributions, and outliers.
+2. Engineer features and generate correlation-based diagnostics.
+3. Train candidate models and compare the final metrics.
+4. Launch the Streamlit app and use the saved model artifacts for prediction.
+
+## Getting Started
+
 ### Install Dependencies
 
-Ensure Python 3.8+ is installed. Then run:
+```bash
+pip install -r requirements.txt
 ```
-pip install pandas numpy scikit-learn xgboost joblib streamlit matplotlib seaborn category_encoders
+
+### Run the App
+
+```bash
+streamlit run app/app.py
 ```
-### Prepare Data
 
-Place listings.csv in data/ (expected columns: id, host_id, neighbourhood, room_type, price, etc.).
+If your Streamlit entry point is different in your environment, use the script that builds the deployed demo.
 
-### Run Pipeline
+## Notes
 
-Execute scripts in order:
-```
-python preprocessing/data_quality.py
-python preprocessing/data_cleaning.py
-python preprocessing/data_discritization.py
-python preprocessing/data_reduction.py
-python preprocessing/data_transform.py
-python preprocessing/feature_importance.py
-python regression/linear_regression/basic_parameter.py
-python regression/linear_regression/optimized_parameter.py
-python regression/decision_tree_regressor/basic_parameter.py
-python regression/decision_tree_regressor/optimized_parameter.py
-python regression/random_forest_regressor/basic_parameters.py
-python regression/random_forest_regressor/optimized_parameter.py
-python regression/gradient_boosting_regressor/basic_parameter.py
-python regression/gradient_boosting_regressor/optimized_parameter.py
-python regression/xgboost_regressor/basic_parameter.py
-python regression/xgboost_regressor/optimized_parameter.py
-python regression/ensemble/adaboost_ensemble.py
-python regression/ensemble/stacking_ensemble.py
-python regression/ensemble/bagging_ensemble.py
-python regression/report_generator.py
-```
-Run Streamlit App
-```
-streamlit run frontend/streamlit_app_frontend.py
-```
-### Usage
-
-**Preprocessing**: Run `data_quality.py` → `data_cleaning.py` → `data_discritization.py` → `data_reduction.py` → `data_transform.py` → `feature_importance.py`.
-
-**Modeling**: Run basic and optimized scripts for each model. Outputs saved in `data/models/`.
-
-**Reporting**: Run `report_generator.py` to compare R² scores.
-
-**App**: Use the Streamlit app to select a model and input listing details to predict price in NZD.
-
-### Component Details
-
-#### Common
-- `config.py`: Defines `RANDOM_SEED=42` and `INPUT_CSV="data/listings.csv"`.
-
-#### Preprocessing
-- `data_quality.py`: Checks missing values, duplicates, types, distributions.
-- `data_cleaning.py`: Handles missing values, outliers, and adds features.
-- `data_discritization.py`: Bins price and availability for analysis.
-- `data_reduction.py`: Drops irrelevant columns and applies PCA.
-- `data_transform.py`: Log-transforms price, encodes categories, scales, and adds polynomial interactions.
-- `feature_importance.py`: Computes correlations, mutual info, RF feature importance, and saves train/test splits.
-
-#### Regression
-- **Linear Regression**: Baseline (R²~0.30). Optimized tweaks `fit_intercept`/`positive`.
-- **Decision Tree**: Basic R²~0.37; optimized improves generalization.
-- **Random Forest**: Ensemble of trees, R²~0.49; optimized tunes `n_estimators`/`max_depth`.
-- **Gradient Boosting**: Sequential boosting, R²~0.48; optimized tunes hyperparameters.
-- **XGBoost**: Fast boosting, R²~0.49; optimized similar to Gradient Boosting.
-- **Ensemble Models**: AdaBoost, Bagging, Stacking combine optimized models for better accuracy.
-- **Report Generator**: Summarizes R² scores and insights.
-
-#### Frontend
-- Streamlit app allows users to select a model, input features, and predict price in NZD. Feature importance is displayed for tree-based models.
-
-### Results
-- **Best Models**: Random Forest, XGBoost (R²~0.49)
-- **Decision Tree**: Moderate (R²~0.37), used in ensembles
-- **Insights**: Non-linear patterns favor tree-based models. Missing features (amenities, seasonality) limit R² < 0.5.
-
-### Future Improvements
-- Add features: amenities, seasonality, review text analysis
-- Expand hyperparameter tuning
-- Deploy app on cloud (e.g., Streamlit Cloud)
-- Fix bugs in transform/reduction scripts
-
-### Contributors
-- **Chamod**: Data Preprocessing
-- **Sandun**: Feature Engineering
-- **Monali**: Data Preprocessing
-- **Lihini**: Streamlit Frontend
-
-### License
+- The price target is handled in NZD.
+- The modeling workflow uses a log transform internally to reduce skew.
+- The published figures in `reports/figures/` are referenced directly in this README for quick review.
