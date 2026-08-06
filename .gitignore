@@ -20,7 +20,6 @@ ENV/
 
 # Data Files
 data/raw/
-data/processed/
 data/interim/
 data/external/
 
